@@ -1,0 +1,16 @@
+[package]
+name = "srv-host-core"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+srv-core = { path = "../srv-core" }
+
+const_format = "0.2.36"
+directories = "6.0.0"
+nanoid = "0.5.0"
+rss = "2.0.13"
+rusqlite = { version = "0.39.0", features = ["bundled"] }
+thiserror = "2.0.18"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.150"

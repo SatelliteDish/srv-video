@@ -1,0 +1,10 @@
+[workspace]
+resolver = "3"
+members = [
+  "srv-daemon",
+  "srv-core",
+  "srv-gui",
+  "srv-host", "srv-host-core",
+  "srv-watch", "srv-watch-core",
+]
+

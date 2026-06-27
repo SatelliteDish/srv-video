@@ -1,0 +1,13 @@
+[package]
+name = "srv-watch"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+srv-core = { path = "../srv-core" }
+srv-watch-core = { path = "../srv-watch-core" }
+clap = { version = "4.6.1", features = ["derive"] }
+open = "5.3.5"
+tokio = { version = "1.52.3", features = ["full"] }
+cli-table = "0.5.0"
+reqwest = "0.13.4"

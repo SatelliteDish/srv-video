@@ -1,0 +1,9 @@
+[package]
+name = "srv-core"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+mime = "0.3.17"
+rss = "2.0.13"
+thiserror = "2.0.18"

@@ -1,0 +1,13 @@
+[package]
+name = "srv-watch-core"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+srv-core = { path = "../srv-core" }
+const_format = "0.2.36"
+directories = "6.0.0"
+reqwest = "0.13.4"
+rss = "2.0.13"
+rusqlite = { version = "0.39.0", features = ["bundled"] }
+thiserror = "2.0.18"

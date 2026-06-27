@@ -1,0 +1,6 @@
+module = "icon"
+
+[icons]
+plus = "plus"
+minus = "minus"
+x = "x"

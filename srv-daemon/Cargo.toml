@@ -1,0 +1,22 @@
+[package]
+name = "srv-daemon"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+srv-host-core = { path = "../srv-host-core" }
+
+actix-web = "4.13.0"
+chrono = "0.4.45"
+directories = "6.0.0"
+futures = "0.3.32"
+rss = "2.0.13"
+slog = "2.8.2"
+slog-async = "2.8.0"
+slog-term = "2.9.2"
+tap = "1.0.1"
+tokio = { version = "1.52.3", features = ["full"] }
+tokio-util = "0.7.18"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.150"
+clap = { version = "4.6.1", features = ["derive"] }
