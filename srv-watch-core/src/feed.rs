@@ -6,6 +6,7 @@ use crate::database::{
     follow::{
         self,
         Subscription,
+        delete_from_following,
     },
     get_db_connection
 };
@@ -37,4 +38,10 @@ pub fn get_following() -> Vec<Subscription> {
     let db = get_db_connection();
     follow::query_following(&db)
         .unwrap()
+}
+
+pub fn unfollow(url: &str) {
+    let db = get_db_connection();
+    delete_from_following(&db, url).unwrap();
+
 }

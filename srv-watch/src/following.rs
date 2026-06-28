@@ -10,8 +10,13 @@ use cli_table::{
 };
 use srv_core::feed::VideoPost;
 use srv_watch_core::{
-    database::follow::Subscription,
-    feed::get_feed,
+    database::follow::{
+        Subscription,
+    },
+    feed::{
+        get_feed,
+        unfollow,
+    },
 };
 
 
@@ -25,6 +30,7 @@ pub struct FollowingArgs {
 #[derive(Debug, Subcommand)]
 pub enum FollowingCommand {
     Videos(FollowingVideosArgs),
+    Remove(FollowingRemoveArgs)
 }
 
 #[derive(Debug, Args)]
@@ -33,6 +39,12 @@ pub struct FollowingVideosArgs {
     #[command(subcommand)]
     command: Option<FollowingVideosCommand>,
 }
+
+#[derive(Debug, Args)]
+pub struct FollowingRemoveArgs {
+    feed_id: u32,
+}
+
 
 #[derive(Debug, Subcommand)]
 pub enum FollowingVideosCommand {
@@ -70,6 +82,7 @@ pub async fn handle_following_args(command: FollowingArgs) -> std::io::Result<()
 async fn handle_following_command(command: FollowingCommand, following: Vec<Subscription>) -> std::io::Result<()> {
     match command {
         FollowingCommand::Videos(cmd) => handle_following_videos_args(cmd, following).await,
+        FollowingCommand::Remove(cmd) => handle_following_remove_args(cmd, following).await,
     }
 }
 
@@ -90,6 +103,12 @@ async fn handle_following_videos_args(command: FollowingVideosArgs, following: V
             handle_following_videos_command(args, items).await?;
         }
     }
+    Ok(())
+}
+
+async fn handle_following_remove_args(command: FollowingRemoveArgs, following: Vec<Subscription>) -> std::io::Result<()> {
+    let picked = following.get(command.feed_id as usize).unwrap();
+    unfollow(&picked.url);
     Ok(())
 }
 
