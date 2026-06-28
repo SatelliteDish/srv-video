@@ -1,7 +1,7 @@
 use rusqlite::Connection;
 use thiserror::Error;
 
-use super::get_work_dir;
+use super::get_data_dir;
 
 pub mod follow;
 
@@ -31,7 +31,7 @@ impl From<rss::Error> for DatabaseError {
 }
 
 pub fn get_db_connection() -> Connection {
-    let mut dir = get_work_dir()
+    let mut dir = get_data_dir()
         .unwrap();
     dir.push("sql.db");
     let con = Connection::open(dir.as_path());
