@@ -54,7 +54,9 @@ pub async fn handle_following_args(command: FollowingArgs) -> std::io::Result<()
     } else {
         let table = following
             .into_iter()
-            .map(|sb| vec![
+            .enumerate()
+            .map(|(i,sb)| vec![
+                format!("{i}").cell(),
                 sb.feed.title().cell().align(Align::Center),
                 sb.feed.description.cell(),
                 sb.url.cell(),
@@ -75,10 +77,13 @@ async fn handle_following_videos_args(command: FollowingVideosArgs, following: V
     let picked: &Subscription = following.get(command.feed_id as usize).unwrap();
     let feed = get_feed(&picked.url).await.unwrap();
     if let Some(items) = feed.items {
-        let table = items.iter().map(|vd| vec![
-            vd.meta.title.clone().cell(),
-            vd.meta.description.clone().unwrap_or("".to_string()).cell(),
-        ]).table();
+        let table = items.iter()
+            .enumerate()
+            .map(|(i,vd)| vec![
+                format!("{i}").cell(),
+                vd.meta.title.clone().cell(),
+                vd.meta.description.clone().unwrap_or("".to_string()).cell(),
+            ]).table();
         print_stdout(table)?;
 
         if let Some(args) = command.command {
