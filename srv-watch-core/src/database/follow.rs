@@ -21,10 +21,10 @@ fn subscription_table_exists(db: &Connection) -> Result<bool> {
 }
 
 fn ensure_subscription_table(db: &Connection) -> Result<()> {
-    if subscription_table_exists(db)? {
+    if !subscription_table_exists(db)? {
         db.execute(concatcp![
             "CREATE TABLE IF NOT EXISTS ",TABLE_NAME,
-            "(url TEXT PRIMARY KEY, title TEXT);"
+            "(url TEXT PRIMARY KEY, title TEXT, description TEXT);"
         ],[]).map_err(DatabaseError::from)?;
     }
 
@@ -42,9 +42,9 @@ pub async fn follow(db: &Connection, url: &str, feed: &Feed) -> Result<()> {
     ensure_subscription_table(db)?;
 
     db.execute(concatcp![
-        "INSERT INTO ",TABLE_NAME,"(url, title)",
-        "VALUES (?1,?2);"
-    ], [&url, feed.title()])
+        "INSERT INTO ",TABLE_NAME,"(url, title, description)",
+        "VALUES (?1,?2,?3);"
+    ], [&url, feed.title(), feed.description()])
         .map_err(DatabaseError::from)?;
 
     Ok(())
@@ -54,18 +54,19 @@ pub async fn follow(db: &Connection, url: &str, feed: &Feed) -> Result<()> {
 pub fn query_following(db: &Connection) -> Result<Vec<Subscription>> {
     ensure_subscription_table(db)?;
 
-    db.prepare(concatcp!["SELECT url, title FROM ",TABLE_NAME])
+    db.prepare(concatcp!["SELECT url, title, description FROM ",TABLE_NAME])
         .map_err(DatabaseError::from)?
         .query_map([], |sub| Ok(Subscription {
             url: sub.get(0)?,
             feed: Feed {
                 title: sub.get(1)?,
+                description: sub.get(2)?,
                 ..Default::default()
             },
         }))
         .map_err(DatabaseError::from)? // Handle query error
         .collect::<std::result::Result<Vec<Subscription>,_>>() // Vec<Result> to Result<Vec>
-        .map_err(|e| DatabaseError::from(e).into()) // Covert to expected err
+        .map_err(|e| DatabaseError::from(e).into()) // Convert to expected err
 }
 
 pub fn delete_from_following(db: &Connection, url: &str) -> Result<()> {
