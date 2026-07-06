@@ -1,45 +1,67 @@
 use iced::{
-    Alignment::Center,
     Element,
-    Length::Fill,
     Task,
     Theme,
     widget::{
         column,
         row,
-        container,
-        button,
-        text,
     },
 };
 use srv_core::feed::Feed;
-use srv_watch_core::feed::get_following;
+use srv_watch_core::feed::{
+    get_following,
+    FollowedFeed,
+};
 
 mod icon;
 
-#[derive(Debug, Clone, Default)]
-struct SrvState {
-    feed: Vec<Feed>,
+mod main_pane;
+use main_pane::{
+    MainPane,
+    MainPaneMessage,
+};
+
+mod feed;
+use feed::{
+    FeedListMessage,
+    FeedList,
+};
+
+mod top_bar;
+use top_bar::{
+    TopBarAction,
+    TopBar,
+};
+
+#[derive(Debug)]
+struct SrvState<'a> {
+    top_bar: TopBar,
+    feed: FeedList,
+    main_pane: MainPane<'a>,
 }
 
-pub fn update(state: &mut SrvState, msg: Message) -> Task<Message> {
-    match msg {
-        Message::Close => iced::window::latest().and_then(iced::window::close),
+impl<'a> SrvState<'a> {
+    pub fn new() -> Self {
+        Self {
+            top_bar: TopBar::new(),
+            feed: FeedList::new(get_following()),
+            main_pane: MainPane::new(),
+        }
     }
 }
 
+
 #[derive(Debug,Clone)]
 enum Message {
-    Close,
+    TopBar(TopBarAction),
+    FeedList(FeedListMessage),
+    MainPane(MainPaneMessage),
 }
 
+
+
 fn main() -> iced::Result {
-    iced::application(|| SrvState {
-        feed: get_following().into_iter().map(|f| Feed {
-            title: f.feed.title,
-            ..Default::default()
-        }).collect(),
-    }, update, view)
+    iced::application(SrvState::new, update, view)
         .theme(Theme::GruvboxDark)
         .title("SrvGui")
         .font(icon::FONT)
@@ -47,27 +69,38 @@ fn main() -> iced::Result {
 
 }
 
-fn top_bar_view<'a>() -> Element<'a, Message> {
-    row![
-        container(text("SrvGui"))
-            .width(Fill)
-            .align_x(Center),
-        button(icon::x()).on_press(Message::Close),
-    ].width(Fill).into()
-}
-
-
-fn view(state: &SrvState) -> Element<'_, Message> {
+fn view<'a>(state: &'a SrvState) -> Element<'a, Message> {
         column![
-            top_bar_view(),
-            feed_list(state),
+            state.top_bar.view().map(Message::TopBar),
+            row![
+                state.feed.view().map(Message::FeedList),
+                state.main_pane.view().map(Message::MainPane),
+            ],
         ].into()
 }
 
+async fn get_fresh_feed(mut feed: FollowedFeed) -> Feed {
+    feed.get_fresh_feed().await
+}
 
-fn feed_list(state: &SrvState) -> Element<'_, Message> {
-    column(
-        state.feed.iter()
-            .map(|feed| text(&feed.title).into())
-    ).into()
+fn update(state: &mut SrvState, msg: Message) -> Task<Message> {
+    match msg {
+        Message::TopBar(msg) => handle_top_bar(msg),
+        Message::FeedList(FeedListMessage::Select(feed)) => {
+            Task::perform(
+                get_fresh_feed(feed),
+                |f| Message::MainPane(MainPaneMessage::ShowFeed(f))
+            )
+        },
+        Message::FeedList(msg) => {
+            state.feed.update(msg).into()
+        },
+        Message::MainPane(msg) => state.main_pane.update(msg).into(),
+    }
+}
+
+fn handle_top_bar(action: TopBarAction) -> Task<Message> {
+    match action {
+        TopBarAction::Close => iced::window::latest().and_then(iced::window::close),
+    }
 }

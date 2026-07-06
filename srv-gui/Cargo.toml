@@ -11,5 +11,7 @@ srv-core = { path = "../srv-core" }
 srv-host-core = { path = "../srv-host-core" }
 srv-watch-core = { path = "../srv-watch-core" }
 
-iced = "0.14.0"
-
+iced = { version = "0.14.0", features = ["tokio"] }
+iced_video_player = "0.6.0"
+url = "2.5.8"
+tokio = { version = "1.52.3", features = ["full"] }
