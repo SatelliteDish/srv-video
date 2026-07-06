@@ -20,6 +20,8 @@ use std::{
     str::FromStr as _,
 };
 
+mod config;
+
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]
 struct Cli {
@@ -88,7 +90,7 @@ async fn handle_feed_cmd(cmd: FeedCommand) {
                 link: args.link,
                 description: args.description,
                 image: args.image,
-                items: Some(vec![]),
+                videos: vec![],
             }).await.unwrap();
         },
     }
@@ -113,8 +115,8 @@ async fn handle_video_cmd(cmd: VideoCommand) {
                 comment_url: None,
                 rating_url: None,
                 src_set: vec![VideoSource {
-                    url: format!("http://10.0.0.85/stream/{id}"),
-                    mime: Mime::from_str("video/mp4").unwrap(),
+                    url: format!("http://127.0.0.1:8080/stream/{id}"),
+                    mime: Mime::from_str("video/mp4").unwrap().to_string(),
                     dimensions: None,
                 }],
             }).await.unwrap();
