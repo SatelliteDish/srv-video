@@ -34,13 +34,13 @@ use top_bar::{
 };
 
 #[derive(Debug)]
-struct SrvState<'a> {
+struct SrvState {
     top_bar: TopBar,
     feed: FeedList,
-    main_pane: MainPane<'a>,
+    main_pane: MainPane,
 }
 
-impl<'a> SrvState<'a> {
+impl SrvState {
     pub fn new() -> Self {
         Self {
             top_bar: TopBar::new(),
@@ -69,7 +69,7 @@ fn main() -> iced::Result {
 
 }
 
-fn view<'a>(state: &'a SrvState) -> Element<'a, Message> {
+fn view(state: &SrvState) -> Element<'_, Message> {
         column![
             state.top_bar.view().map(Message::TopBar),
             row![

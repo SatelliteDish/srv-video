@@ -1,72 +1,108 @@
+use std::time::Duration;
+
 use iced::{
-    Element,
-    widget::{
-        column,
-        text,
+    Alignment, Element, Length, widget::{
+        Slider, button, column, row,
     },
 };
 use iced_video_player::{
-    Video,
-    VideoPlayer as IcedPlayer,
+    Video, VideoPlayer as IcedPlayer,
 };
-use std::fmt;
+use crate::icon;
 
 #[derive(Debug, Clone)]
 pub enum VideoPlayerMessage {
-    SetVideo(String),
+    Play,
+    Pause,
+    Seek(f64),
+    SeekRelease,
 }
 
 #[derive(Debug)]
-pub enum VideoPlayerStatus {
-    Empty,
-    Ready(Video),
+pub struct VideoPlayer {
+    video: Video,
+    position: f64,
+    dragging: bool,
 }
 
-pub struct VideoPlayer<'a> {
-    player: Option<IcedPlayer<'a, VideoPlayerMessage>>,
-    status: VideoPlayerStatus,
-}
 
-impl<'a> fmt::Debug for VideoPlayer<'a> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("VideoPlayer")
-            .field("status", &self.status)
-            .field("player", &self.player.as_ref().map(|_| "Player"))
-            .finish()
-    }
-}
-
-impl<'a> VideoPlayer<'a> {
-    pub fn new() -> Self {
+impl VideoPlayer {
+    pub fn new(video_url: &str) -> Self {
         Self {
-            player: None,
-            status: VideoPlayerStatus::Empty,
+            video: Video::new(&url::Url::parse(video_url).unwrap()).unwrap(),
+            position: 0.0,
+            dragging: false,
         }
+    }
+
+    fn pause(&mut self) {
+        self.video.set_paused(true);
+    }
+
+    fn unpause(&mut self) {
+        self.video.set_paused(false);
     }
 
     pub fn view(&self) -> Element<'_, VideoPlayerMessage> {
-        let mut view = column([]);
+        column![
+            IcedPlayer::new(&self.video),
+            self.control_bar(),
+        ].into()
+    }
 
-        match &self.status {
-            VideoPlayerStatus::Empty => {
-                view = view.push(text("Select a video to get started"));
-            },
-            VideoPlayerStatus::Ready(video) => {
-                view = view.push(IcedPlayer::new(&video));
-            },
-        }
+    fn control_bar(&self) -> Element<'_, VideoPlayerMessage> {
+        row![
+            self.pause_button(),
+            Slider::new(
+                0.0..=self.video.duration().as_secs_f64(),
+                self.position,
+                VideoPlayerMessage::Seek,
+            )
+                .step(0.1)
+                .on_release(VideoPlayerMessage::SeekRelease),
+        ]
+            .height(Length::Fixed(60.0))
+            .align_y(Alignment::Center)
+            .into()
+    }
 
-        view.into()
+    fn pause_button(&self) -> Element<'_, VideoPlayerMessage> {
+        if self.video.paused() {
+            button(
+                icon::play()
+                    .width(Length::Fixed(50.0))
+                    .height(Length::Fixed(50.0))
+            )
+                    .width(Length::Fixed(50.0))
+                    .height(Length::Fixed(50.0))
+                .on_press(VideoPlayerMessage::Play)
+        } else {
+            button(
+                    icon::pause()
+                        .width(Length::Fixed(50.0))
+                        .height(Length::Fixed(50.0))
+                )
+                    .width(Length::Fixed(50.0))
+                    .height(Length::Fixed(50.0))
+                .on_press(VideoPlayerMessage::Pause)
+        }.into()
     }
 
     pub fn update(&mut self, msg: VideoPlayerMessage) {
         match msg {
-            VideoPlayerMessage::SetVideo(video_url) => {
-                println!("{}",&video_url);
-                println!("{}", &url::Url::parse(&video_url).unwrap());
-                self.status = VideoPlayerStatus::Ready(
-                    Video::new(&url::Url::parse(&video_url).unwrap()).unwrap()
-                );
+            VideoPlayerMessage::Play => self.unpause(),
+            VideoPlayerMessage::Pause => self.pause(),
+            VideoPlayerMessage::Seek(pos) => {
+                self.pause();
+                self.dragging = true;
+                self.position = pos;
+            },
+            VideoPlayerMessage::SeekRelease => {
+                self.dragging = false;
+                self.video
+                    .seek(Duration::from_secs_f64(self.position), false)
+                    .expect("Failed to seek");
+                self.unpause();
             },
         }
     }

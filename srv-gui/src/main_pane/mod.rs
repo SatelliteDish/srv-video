@@ -34,18 +34,18 @@ pub enum MainPaneMessage {
 }
 
 #[derive(Debug)]
-pub enum PaneState<'a> {
+pub enum PaneState {
     Start(StartPane),
     Feed(FeedPane),
-    Video(VideoPane<'a>),
+    Video(VideoPane),
 }
 
 #[derive(Debug)]
-pub struct MainPane<'a> {
-    pane: PaneState<'a>,
+pub struct MainPane {
+    pane: PaneState,
 }
 
-impl<'a> MainPane<'a> {
+impl MainPane {
     pub fn new() -> Self {
         Self {
             pane: PaneState::Start(StartPane::new()),

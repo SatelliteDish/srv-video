@@ -1,6 +1,6 @@
 // Generated automatically by iced_lucide at build time.
 // Do not edit manually.
-// 9bccf08649bc03eeaa7e0af307e7c9f4c577a15b100f3892625874401e70d098
+// b569177db315321e24dce4bae7bc53d0b5c48ff460c90eae0ffaf38a7cfb147c
 use iced::Font;
 use iced::widget::{Text, text};
 
@@ -11,12 +11,22 @@ pub const FONT: &[u8] = include_bytes!("../fonts/lucide.ttf");
 #[allow(dead_code)]
 pub const ALL_ICONS: &[(&str, &str)] = &[
     ("minus", "\u{E11C}"),
+    ("pause", "\u{E12E}"),
+    ("play", "\u{E13C}"),
     ("plus", "\u{E13D}"),
     ("x", "\u{E1B2}"),
 ];
 
 pub fn minus<'a>() -> Text<'a> {
     icon("\u{E11C}")
+}
+
+pub fn pause<'a>() -> Text<'a> {
+    icon("\u{E12E}")
+}
+
+pub fn play<'a>() -> Text<'a> {
+    icon("\u{E13C}")
 }
 
 pub fn plus<'a>() -> Text<'a> {

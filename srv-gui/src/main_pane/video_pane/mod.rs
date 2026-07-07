@@ -4,10 +4,6 @@ use iced::{
         column, text,
     },
 };
-use iced_video_player::{
-    Video,
-};
-use url::Url;
 use srv_core::feed::VideoPost;
 
 mod video_player;
@@ -19,24 +15,20 @@ use video_player::{
 
 #[derive(Debug, Clone)]
 pub enum VideoPaneMessage {
-    SetVideo(VideoPost),
     VideoPlayer(VideoPlayerMessage),
 }
 
 #[derive(Debug)]
-pub struct VideoPane<'a> {
+pub struct VideoPane {
     pub video_data: VideoPost,
-    pub player: VideoPlayer<'a>,
+    pub player: VideoPlayer,
 }
 
-impl<'a> VideoPane<'a> {
+impl VideoPane {
     pub fn new(video_data: VideoPost) -> Self {
-        let mut player = VideoPlayer::new();
-        player.update(VideoPlayerMessage::SetVideo(video_data.src_set.get(0).unwrap().url.clone()));
-
         Self {
+            player: VideoPlayer::new(&video_data.src_set.get(0).unwrap().url),
             video_data,
-            player,
         }
     }
 
@@ -52,10 +44,7 @@ impl<'a> VideoPane<'a> {
 
     pub fn update(&mut self, message: VideoPaneMessage) {
         match message {
-            VideoPaneMessage::SetVideo(data) => {
-                self.video_data = data;
-            },
-            VideoPaneMessage::VideoPlayer(msg) => {},
+            VideoPaneMessage::VideoPlayer(msg) => self.player.update(msg),
         }
     }
 }

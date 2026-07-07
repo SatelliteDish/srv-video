@@ -32,7 +32,11 @@ impl TopBar {
             container(text(&self.title))
                 .width(Fill)
                 .align_x(Center),
-            button(icon::x()).on_press(TopBarAction::Close),
+            button(
+                icon::x()
+            )
+                .style(button::danger)
+                .on_press(TopBarAction::Close),
         ].width(Fill).into()
     }
 }
