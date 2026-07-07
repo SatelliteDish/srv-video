@@ -21,6 +21,7 @@ use std::{
 };
 
 mod config;
+use config::get_config;
 
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]
@@ -100,6 +101,7 @@ async fn handle_feed_cmd(cmd: FeedCommand) {
 async fn handle_video_cmd(cmd: VideoCommand) {
     match cmd {
         VideoCommand::Add(args) => {
+            let config = get_config(None);
             let db = database::get_db_connection().unwrap();
             let id = database::videos::register_video(&db, &args.link).await.unwrap();
 
@@ -115,7 +117,7 @@ async fn handle_video_cmd(cmd: VideoCommand) {
                 comment_url: None,
                 rating_url: None,
                 src_set: vec![VideoSource {
-                    url: format!("http://127.0.0.1:8080/stream/{id}"),
+                    url: format!("{}/stream/{id}",config.address()),
                     mime: Mime::from_str("video/mp4").unwrap().to_string(),
                     dimensions: None,
                 }],
