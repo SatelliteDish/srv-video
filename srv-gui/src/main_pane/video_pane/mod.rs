@@ -25,21 +25,24 @@ pub enum VideoPaneMessage {
 
 #[derive(Debug)]
 pub struct VideoPane<'a> {
-    pub video_data: Option<VideoPost>,
+    pub video_data: VideoPost,
     pub player: VideoPlayer<'a>,
 }
 
 impl<'a> VideoPane<'a> {
-    pub fn new() -> Self {
+    pub fn new(video_data: VideoPost) -> Self {
+        let mut player = VideoPlayer::new();
+        player.update(VideoPlayerMessage::SetVideo(video_data.src_set.get(0).unwrap().url.clone()));
+
         Self {
-            video_data: None,
-            player: VideoPlayer::new(),
+            video_data,
+            player,
         }
     }
 
     pub fn view(&self) -> Element<'_, VideoPaneMessage> {
         let Self { video_data, player } = self;
-        let title = video_data.as_ref().map(|v| v.meta.title.to_string()).unwrap_or("Select a video to get started".to_string());
+        let title = video_data.meta.title.to_string();
 
         column![
             text(title),
@@ -50,8 +53,7 @@ impl<'a> VideoPane<'a> {
     pub fn update(&mut self, message: VideoPaneMessage) {
         match message {
             VideoPaneMessage::SetVideo(data) => {
-                self.player.update(VideoPlayerMessage::SetVideo(data.src_set.get(0).unwrap().url.clone()));
-                self.video_data = Some(data);
+                self.video_data = data;
             },
             VideoPaneMessage::VideoPlayer(msg) => {},
         }
